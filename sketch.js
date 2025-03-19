@@ -8,6 +8,9 @@ let gameState;
 let font;
 let spriteSheet;
 
+let dbScoreArr = [];
+let dbNameArr = [];
+
 class Entity {
     constructor(x, y, w, h, spd) {
         this.x = x 
@@ -49,6 +52,8 @@ class Game {
         this.waterArr = [];
         this.goodiesArr = [];
         this.baddiesArr = [];
+
+        this.recLoading;
     }
 
     initMenu() {
@@ -132,11 +137,18 @@ class Game {
     }
 
     initRecords() {
+        loadName();
+        loadScore();
+        this.recLoading = 180;
+        
         gameState = 'records';
     }
 
     updateMenu() {}
-    updateRecords() {}
+
+    updateRecords() {
+        if (this.recLoading > 0) this.recLoading -= 1
+    }
 
     updateGame() {
         if (this.temperature > 35 || this.temperature < 24) {
@@ -268,10 +280,12 @@ class Game {
         drawText("Твой рекорд:", canvasWidth/2, 1*tileSize, 48);
         drawText(`${this.score}`, canvasWidth/2, 2*tileSize, 48);
 
-        for (let i = 0; i < 5; i++) {
-            drawText(`${i+1}: ${'name'} ${'score'}`, canvasWidth/2, (i+7)*tileSize/2);    
+        if (this.recLoading === 0) {
+            for (let i = 0; i < 5; i++) {
+                drawText(`${i+1}: ${dbNameArr[i]['nickname']} ${dbScoreArr[i]['score']}`, canvasWidth/2, (i+7)*tileSize/2);    
+            }
         }
-
+        
         drawText("Нажми ПРОБЕЛ, чтобы выйти", canvasWidth/2, 7*tileSize);
     }
 
@@ -327,7 +341,7 @@ function setupCanvas(w, h) {
 
 function setupGame() {
     game = new Game();
-    gameState = 'records'; // menu game records
+    game.initMenu();
 }
 
 function setupAssets () {
@@ -392,7 +406,6 @@ function keyPressed() {
                 game.nicknameArr.shift();
             }
             game.nickname = game.nicknameArr[0] + game.nicknameArr[1] + game.nicknameArr[2];
-            // console.log(game.nickname);
         }
     }
     if (gameState === 'records' && keyIsDown(32)) {

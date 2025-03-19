@@ -7,8 +7,20 @@ async function saveData() {
   .select('*')
 }
   
-async function loadData() {
-  const { data, error } = await _supabase
+async function loadName() {
+  const { data } = await _supabase
   .from('records')
-  .select('*')
+  .select('nickname')
+
+  dbNameArr = data;
+  console.log(dbNameArr);
+}
+
+async function loadScore() {
+  const { data } = await _supabase
+  .from('records')
+  .select('score')
+
+  dbScoreArr = data;
+  console.log(dbScoreArr);
 }
