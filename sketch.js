@@ -20,7 +20,7 @@ class Entity {
 
 class Game {
     constructor() {
-        // this.nickname;
+        this.nickname;
         this.score;
 
         this.temperature;
@@ -44,7 +44,7 @@ class Game {
         this.goodiesState;
         this.baddiesState;
 
-        // this.nicknameArr = []
+        this.nicknameArr = []
         this.tomatoArr = [];
         this.waterArr = [];
         this.goodiesArr = [];
@@ -52,6 +52,8 @@ class Game {
     }
 
     initMenu() {
+        this.nicknameArr = ['a', 'a', 'a']
+        this.nickname = this.nicknameArr[0] + this.nicknameArr[1] + this.nicknameArr[2]
         gameState = 'menu';
     }
 
@@ -95,6 +97,7 @@ class Game {
         if (this.cooldown.water > 0) this.cooldown.water --;
         if (this.cooldown.goodies > 0) this.cooldown.goodies --;
         if (this.cooldown.baddies > 0) this.cooldown.baddies --;
+        if (this.cooldown.tomatos > 0) this.cooldown.tomatos --;
 
         if (this.cooldown.determinatebaddies > 0) this.cooldown.determinatebaddies --;
         if (this.cooldown.changetemperature > 0) this.cooldown.changetemperature --;
@@ -110,7 +113,7 @@ class Game {
 
         if (this.cooldown.changewater <= 0) {
             this.wetness += floor(random(-3, 3));
-            this.cooldown.changewater = 2;
+            this.cooldown.changewater = 1;
         }
 
         if (this.cooldown.changegoodies <= 0) {
@@ -121,6 +124,11 @@ class Game {
         //[spawn cats]
         let spawnCatChance = random(0, 1);
         if (spawnCatChance > 0.80) this.doBaddies();
+
+        //[spawn tomatos]
+        if (this.temperatureState === 'good' && this.wetnessState === 'good' && this.goodiesState === 'good' && this.baddiesState === 'good') {
+            this.doTomato();
+        }
     }
 
     initRecords() {
@@ -192,14 +200,19 @@ class Game {
             }
         });
 
-        this.tomatoArr.forEach((tomato) => {
-            
-        }); //TOMATO
+        for (let i = this.tomatoArr.length - 1; i >= 0; i--) {
+            let tomato = this.tomatoArr[i];
+            if (collisionCheck(this.farmer, tomato)) {
+                this.score += 10
+                this.tomatoArr.splice(i, 1)
+            }
+        } //TOMATO
     }
 
     drawMenu() {
         background('green');
         drawText("Тепличный менеджер", canvasWidth/2, 1*tileSize, 32);
+        drawText("Твое имя: " + `${this.nickname.toUpperCase()}`, canvasWidth/2, 5*tileSize, 18);
         drawText("Нажми ПРОБЕЛ, чтобы играть", canvasWidth/2, 7*tileSize);
     }
 
@@ -287,7 +300,7 @@ class Game {
     }
 
     doTomato() {
-        let tomato = new Entity(floor(random(16, canvasWidth - 16)), -16, 32, 32, 8);
+        let tomato = new Entity(floor(random(16, canvasWidth - 16)), floor(random(4.5*tileSize, 5.5*tileSize)), 32, 32, 8);
         this.tomatoArr.push(tomato);
     }
 
@@ -361,9 +374,26 @@ function drawRect(x, y, w, h, c = 'white') {
     rect(x, y, w, h)
 }
 
+function collisionCheck(a, b) {
+    return a.x + a.w >= b.x &&
+    a.x <= b.x + b.w &&
+    a.y + a.h >= b.y &&
+    a.y <= b.y + b.h;
+}
+
 function keyPressed() {
-    if (gameState === 'menu' && keyIsDown(32)) {
-        game.initGame();
+    if (gameState === 'menu') {
+        if (keyIsDown(32)) {
+            game.initGame();   
+        }
+        if (keyCode >= 65 && keyCode <= 90) {
+            game.nicknameArr.push(key);
+            if (game.nicknameArr.length > 3) {
+                game.nicknameArr.shift();
+            }
+            game.nickname = game.nicknameArr[0] + game.nicknameArr[1] + game.nicknameArr[2];
+            // console.log(game.nickname);
+        }
     }
     if (gameState === 'records' && keyIsDown(32)) {
         game.initMenu();
