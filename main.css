@@ -1,0 +1,19 @@
+@font-face {
+    font-family: press-start;
+    src: url('./res/PressStart2P-Regular.ttf');
+}
+
+body {
+    background-image: url('./res/farmland.png');
+    background-repeat: repeat;
+
+    color: white;
+    font-family: press-start;
+    font-size: 32;
+}
+
+canvas {
+    border: solid;
+    border-color: green;
+    border-style: ridge;
+}
