@@ -117,8 +117,16 @@ class Game {
         }
 
         if (this.cooldown.changewater <= 0) {
-            this.wetness += floor(random(-3, 3));
-            this.cooldown.changewater = 1;
+            if (this.temperatureState === 'good') {
+                this.wetness += floor(random(-3, 3));
+                this.cooldown.changewater = 1;
+            } else if (this.temperatureState === 'good' && this.temperature > 35) {
+                this.wetness -= 2;
+                this.cooldown.changewater = 1;
+            } else if (this.temperatureState === 'good' && this.temperature < 24) {
+                this.wetness -= 0;
+                this.cooldown.changewater = 1;
+            }
         }
 
         if (this.cooldown.changegoodies <= 0) {
@@ -193,6 +201,9 @@ class Game {
             if (water.y > 6.5 * tileSize) {
                 this.waterArr.shift();
                 this.wetness ++;
+                if (this.goodies > 0) {
+                    this.goodies --;
+                }
             }
         });
 
@@ -215,8 +226,8 @@ class Game {
         for (let i = this.tomatoArr.length - 1; i >= 0; i--) {
             let tomato = this.tomatoArr[i];
             if (collisionCheck(this.farmer, tomato)) {
-                this.score += 10
-                this.tomatoArr.splice(i, 1)
+                this.score += 10;
+                this.tomatoArr.splice(i, 1);
             }
         } //TOMATO
     }
