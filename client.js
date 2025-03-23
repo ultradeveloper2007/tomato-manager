@@ -7,20 +7,12 @@ async function saveData() {
   .select('*')
 }
   
-async function loadName() {
+async function loadData() {
   const { data } = await _supabase
   .from('records')
-  .select('nickname')
+  .select('nickname, score')
+  .order('score', {ascending: false});
 
-  dbNameArr = data;
-  console.log(dbNameArr);
-}
-
-async function loadScore() {
-  const { data } = await _supabase
-  .from('records')
-  .select('score')
-
-  dbScoreArr = data;
-  console.log(dbScoreArr);
+  dbArr = data;
+  console.log(dbArr);
 }

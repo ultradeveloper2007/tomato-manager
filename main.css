@@ -18,3 +18,7 @@ canvas {
     border-color: green;
     border-style: ridge;
 }
+
+.logo {
+    text-shadow: 3px 3px 2px black;
+}

@@ -8,16 +8,15 @@ let gameState;
 let font;
 let spriteSheet;
 
-let dbScoreArr = [];
-let dbNameArr = [];
+let dbArr = [];
 
 class Entity {
     constructor(x, y, w, h, spd) {
-        this.x = x 
-        this.y = y
-        this.w = w 
-        this.h = h
-        this.spd = spd
+        this.x = x; 
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.spd = spd;
     }
 }
 
@@ -145,8 +144,7 @@ class Game {
     }
 
     initRecords() {
-        loadName();
-        loadScore();
+        loadData();
         this.recLoading = 180;
         
         gameState = 'records';
@@ -241,7 +239,7 @@ class Game {
 
     drawGame() {
         background('cornflowerblue');
-        
+
         //[LAYER 1]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
             image(spriteSheet, i*tileSize, 4.5*tileSize, 64, 64, 0, 32, 32, 32);
@@ -293,11 +291,11 @@ class Game {
 
         if (this.recLoading === 0) {
             for (let i = 0; i < 5; i++) {
-                drawText(`${i+1}: ${dbNameArr[i]['nickname']} ${dbScoreArr[i]['score']}`, canvasWidth/2, (i+7)*tileSize/2);    
+                drawText(`${i+1}: ${dbArr[i]['nickname']} ${dbArr[i]['score']}`, canvasWidth/2 - tileSize, (i+7)*tileSize/2, 14, 'white', LEFT);
             }
         }
         
-        drawText("Нажми ПРОБЕЛ, чтобы выйти", canvasWidth/2, 7*tileSize);
+        drawText("Нажми ПРОБЕЛ, чтобы вернуться в меню", canvasWidth/2, 7*tileSize);
     }
 
     doWater() {
@@ -352,7 +350,7 @@ function setupCanvas(w, h) {
 
 function setupGame() {
     game = new Game();
-    game.initMenu();
+    game.initRecords();
 }
 
 function setupAssets () {
@@ -388,15 +386,17 @@ function drawGrid() {
 }
 
 function drawText(t, x, y, s = 14, c = 'white', a = CENTER) {
-    fill(c)
-    textSize(s)
-    textAlign(a)
+    stroke(0);
+    strokeWeight(4);
+    fill(c);
+    textSize(s);
+    textAlign(a);
     text(t, x, y);
 }
 
 function drawRect(x, y, w, h, c = 'white') {
-    fill(c)
-    rect(x, y, w, h)
+    fill(c);
+    rect(x, y, w, h);
 }
 
 function collisionCheck(a, b) {
@@ -431,15 +431,15 @@ function keyPressed() {
             game.temperature --;
             // console.log(key + keyCode + ": температура -");
         }
-        if (keyIsDown(81)) {
+        if (keyIsDown(49)) {
             game.doWater();
             // console.log(key + keyCode + ": влажность +");
         }
-        if (keyIsDown(69)) {
+        if (keyIsDown(50)) {
             game.doGoodies();
             // console.log(key + keyCode + ": удобрение +");
         }
-        if (keyIsDown(68)) {
+        if (keyIsDown(51)) {
             game.determinateBaddies();
             // console.log(key + keyCode + ": вредители +");
         }
