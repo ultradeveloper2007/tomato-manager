@@ -108,7 +108,6 @@ class Game {
         if (this.cooldown.changewater > 0) this.cooldown.changewater --;
         if (this.cooldown.changegoodies > 0) this.cooldown.changegoodies --;
 
-
         //[every second]
         if (this.cooldown.changetemperature <= 0) {
             this.temperature += floor(random(-3, 3));
@@ -144,6 +143,10 @@ class Game {
     }
 
     initRecords() {
+        if (this.score > 0) {
+            saveData(this.nickname.toUpperCase(), this.score);
+        }
+
         loadData();
         this.recLoading = 180;
         
@@ -350,7 +353,7 @@ function setupCanvas(w, h) {
 
 function setupGame() {
     game = new Game();
-    game.initRecords();
+    game.initMenu();
 }
 
 function setupAssets () {
@@ -387,7 +390,7 @@ function drawGrid() {
 
 function drawText(t, x, y, s = 14, c = 'white', a = CENTER) {
     stroke(0);
-    strokeWeight(4);
+    strokeWeight(3);
     fill(c);
     textSize(s);
     textAlign(a);
