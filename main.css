@@ -4,20 +4,20 @@
 }
 
 body {
-    background-image: url('./res/farmland.png');
-    background-repeat: repeat;
+    /* background-image: url('./res/farmland.png');
+    background-repeat: repeat; */
 
-    text-shadow: 3px 3px 2px black;
+    /* text-shadow: 3px 3px 2px black; */
     text-align: center;
-    color: white;
+    color: black;
+
     font-family: press-start;
     font-size: 14px;
 }
 
 canvas {
     border: solid;
-    border-color: green;
-    border-style: ridge;
+    border-color: black;
 }
 
 .logo {

@@ -454,15 +454,15 @@ function keyPressed() {
             game.temperature --;
             // console.log(key + keyCode + ": температура -");
         }
-        if (keyIsDown(49)) {
+        if (keyIsDown(81)) {
             game.doWater();
             // console.log(key + keyCode + ": влажность +");
         }
-        if (keyIsDown(50)) {
+        if (keyIsDown(69)) {
             game.doGoodies();
             // console.log(key + keyCode + ": удобрение +");
         }
-        if (keyIsDown(51)) {
+        if (keyIsDown(68)) {
             game.determinateBaddies();
             // console.log(key + keyCode + ": вредители +");
         }
