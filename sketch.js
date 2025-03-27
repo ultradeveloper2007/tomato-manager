@@ -66,7 +66,7 @@ class Game {
         this.wetness = floor(random(39, 54));
         this.goodies = floor(random(0, 4));
         this.baddies = 0;
-        this.time = 180;
+        this.time = 120; //timer
         this.score = 0;
         
         this.cooldown = {
@@ -82,6 +82,8 @@ class Game {
         }
 
         this.farmer = new Entity(canvasWidth/2, 4.5*tileSize, tileSize, 2*tileSize, 4);
+        this.farmer.dirW = 32;
+        this.farmer.dirH = 96;
 
         this.everysec = setInterval(() => {
             if (this.time > 0) {
@@ -118,10 +120,10 @@ class Game {
             if (this.temperatureState === 'good') {
                 this.wetness += floor(random(-3, 3));
                 this.cooldown.changewater = 1;
-            } else if (this.temperatureState === 'good' && this.temperature > 35) {
+            } else if (this.temperatureState === 'bad' && this.temperature > 35) {
                 this.wetness -= 2;
                 this.cooldown.changewater = 1;
-            } else if (this.temperatureState === 'good' && this.temperature < 24) {
+            } else if (this.temperatureState === 'bad' && this.temperature < 24) {
                 this.wetness -= 0;
                 this.cooldown.changewater = 1;
             }
@@ -142,12 +144,16 @@ class Game {
         }
     }
 
-    initRecords() {
+    async dbInit() {
         if (this.score > 0) {
-            saveData(this.nickname.toUpperCase(), this.score);
+            await saveData(this.nickname.toUpperCase(), this.score);
         }
 
-        loadData();
+        await loadData();
+    }
+
+    initRecords() {
+        this.dbInit();
         this.recLoading = 180;
         
         gameState = 'records';
@@ -195,6 +201,21 @@ class Game {
         if (this.farmer.x + this.farmer.w >= canvasWidth || this.farmer.x <= 0) {
             this.farmer.spd = -this.farmer.spd;
         }
+
+        if (this.farmer.spd < 0) {
+            if (this.farmer.dirH === 96) {
+                this.farmer.dirH = 64;
+                this.farmer.dirW = 32;
+            }
+        }
+        
+        if (this.farmer.spd > 0) {
+            if (this.farmer.dirH === 64) {
+                this.farmer.dirH = 96;
+                this.farmer.dirW = 32;
+            }
+        }
+        
         this.farmer.x -= this.farmer.spd;
 
         this.waterArr.forEach((water) => {
@@ -245,8 +266,7 @@ class Game {
 
         //[LAYER 1]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
-            image(spriteSheet, i*tileSize, 4.5*tileSize, 64, 64, 0, 32, 32, 32);
-            image(spriteSheet, i*tileSize, 5.5*tileSize, 64, 64, 0, 32, 32, 32);
+            image(spriteSheet, i*tileSize, 4.5*tileSize, 64, 128, 0, 32, 32, 64);
         } // VINE
         // drawRect(0, 5.5*tileSize, canvasWidth, 64, 'green');
 
@@ -255,7 +275,7 @@ class Game {
             image(spriteSheet, tomato.x, tomato.y, tomato.w, tomato.h, 0, 0, 32, 32);
         }); //TOMATO
 
-        image(spriteSheet, this.farmer.x, this.farmer.y, this.farmer.w, this.farmer.h, 64, 32, 32, 64); //DUDE
+        image(spriteSheet, this.farmer.x, this.farmer.y, this.farmer.w, this.farmer.h, this.farmer.dirH, this.farmer.dirW, 32, 64); //DUDE
         // drawRect(this.farmer.x, this.farmer.y, this.farmer.w, this.farmer.h, 'tan');
 
         this.waterArr.forEach((water) => {
@@ -272,7 +292,7 @@ class Game {
 
         //[LAYER 3]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
-            image(spriteSheet, i*tileSize, 6.5*tileSize, 64, 64, 32, 32, 32, 32);
+            image(spriteSheet, i*tileSize, 6.5*tileSize, 64, 96, 32, 32, 32, 64);
         } // DIRT
         // drawRect(0, 6.5*tileSize, canvasWidth, 64, 'brown');
         
