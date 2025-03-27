@@ -222,7 +222,7 @@ class Game {
             water.y += water.spd;
             if (water.y > 6.5 * tileSize) {
                 this.waterArr.shift();
-                this.wetness ++;
+                this.wetness += 5;
                 if (this.goodies > 0) {
                     this.goodies --;
                 }
@@ -323,11 +323,8 @@ class Game {
 
     doWater() {
         if (this.cooldown.water <= 0) {
-            for (let i = 0; i < 10; i++) {
-                let water = new Entity(i * tileSize + 16, 0, 32, 32, 8);
-                this.waterArr.push(water);
-            }
-            this.cooldown.water = 2;
+            let water = new Entity(floor(random(tileSize, canvasWidth)), 0, 32, 32, 8);
+            this.waterArr.push(water);
         }
     }
 
