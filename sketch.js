@@ -8,6 +8,15 @@ let gameState;
 let font;
 let spriteSheet;
 
+// let sprite = {
+//     tomato,
+//     water,
+//     goodies,
+//     catterpillar,
+//     vines,
+//     ground,
+// }
+
 let dbArr = [];
 
 class Entity {
@@ -31,10 +40,6 @@ class Game {
         this.baddies;
         this.cooldown;
         this.time;
-
-        this.everysec;
-
-        this.farmer;
 
         this.temperatureColor;
         this.wetnessColor;
@@ -62,47 +67,51 @@ class Game {
     }
 
     initGame() {
-        this.temperature = floor(random(26, 33));
-        this.wetness = floor(random(39, 54));
+        this.temperature = floor(random(20, 26));
+        this.wetness = floor(random(70, 73));
         this.goodies = floor(random(0, 4));
         this.baddies = 0;
-        this.time = 120; //timer
+        this.time = 30; //timer
         this.score = 0;
         
         this.cooldown = {
-            water: 2,
-            goodies: 1,
-            baddies: 3,
+            dowater: 2,
+            dogoodies: 2,
+            dobaddies: 3,
 
             determinatebaddies: 1,
-            
             changetemperature: 2,
             changewater: 2,
             changegoodies: 2
         }
 
-        this.farmer = new Entity(canvasWidth/2, 4.5*tileSize, tileSize, 2*tileSize, 4);
-        this.farmer.dirW = 32;
-        this.farmer.dirH = 96;
-
-        this.everysec = setInterval(() => {
+        let everysec;
+        everysec = setInterval(() => {
             if (this.time > 0) {
                 this.time--;
-                this.onTimerTick();
             } else {
-                clearInterval(this.everysec);
+                clearInterval(everysec);
                 this.initRecords();
             }
         }, 1000);
+
+        let timerTick;
+        timerTick = setInterval(() => {
+            if (this.time > 0) {
+                this.onTimerTick();
+            } else {
+                clearInterval(timerTick);
+            }
+        }, 500);
 
         gameState = 'game';
     }
 
     onTimerTick() {
         // [buttons cooldown]
-        if (this.cooldown.water > 0) this.cooldown.water --;
-        if (this.cooldown.goodies > 0) this.cooldown.goodies --;
-        if (this.cooldown.baddies > 0) this.cooldown.baddies --;
+        if (this.cooldown.dowater > 0) this.cooldown.dowater --;
+        if (this.cooldown.dogoodies > 0) this.cooldown.dogoodies --;
+        if (this.cooldown.dobaddies > 0) this.cooldown.dobaddies --;
         if (this.cooldown.tomatos > 0) this.cooldown.tomatos --;
 
         if (this.cooldown.determinatebaddies > 0) this.cooldown.determinatebaddies --;
@@ -110,33 +119,25 @@ class Game {
         if (this.cooldown.changewater > 0) this.cooldown.changewater --;
         if (this.cooldown.changegoodies > 0) this.cooldown.changegoodies --;
 
-        //[every second]
+        //[every]
         if (this.cooldown.changetemperature <= 0) {
-            this.temperature += floor(random(-3, 3));
-            this.cooldown.changetemperature = 2;
+            this.temperature += floor(random(-2, 2));
+            this.cooldown.changetemperature = 3;
         }
 
         if (this.cooldown.changewater <= 0) {
-            if (this.temperatureState === 'good') {
-                this.wetness += floor(random(-3, 3));
-                this.cooldown.changewater = 1;
-            } else if (this.temperatureState === 'bad' && this.temperature > 35) {
-                this.wetness -= 2;
-                this.cooldown.changewater = 1;
-            } else if (this.temperatureState === 'bad' && this.temperature < 24) {
-                this.wetness -= 0;
-                this.cooldown.changewater = 1;
-            }
+            this.wetness += floor(random(-2, 2));
+            this.cooldown.changewater = 3;
         }
 
         if (this.cooldown.changegoodies <= 0) {
             if (this.goodies > 0) this.goodies--;
-            this.cooldown.changegoodies = 2;
+            this.cooldown.changegoodies = 3;
         }
 
         //[spawn cats]
         let spawnCatChance = random(0, 1);
-        if (spawnCatChance > 0.80) this.doBaddies();
+        if (spawnCatChance > 0.85) this.doBaddies();
 
         //[spawn tomatos]
         if (this.temperatureState === 'good' && this.wetnessState === 'good' && this.goodiesState === 'good' && this.baddiesState === 'good') {
@@ -166,7 +167,7 @@ class Game {
     }
 
     updateGame() {
-        if (this.temperature > 35 || this.temperature < 24) {
+        if (this.temperature > 27 || this.temperature < 18) {
             this.temperatureState = 'bad';
             this.temperatureColor = 'red';
         } else {
@@ -174,7 +175,7 @@ class Game {
             this.temperatureColor = 'white';
         }
         
-        if (this.wetness > 80 || this.wetness < 40) {
+        if (this.wetness > 75 || this.wetness < 70) {
             this.wetnessState = 'bad';
             this.wetnessColor = 'red';
         } else {
@@ -197,27 +198,7 @@ class Game {
             this.baddiesState = 'good';
             this.baddiesColor = 'green';
         }
-
-        if (this.farmer.x + this.farmer.w >= canvasWidth || this.farmer.x <= 0) {
-            this.farmer.spd = -this.farmer.spd;
-        }
-
-        if (this.farmer.spd < 0) {
-            if (this.farmer.dirH === 96) {
-                this.farmer.dirH = 64;
-                this.farmer.dirW = 32;
-            }
-        }
         
-        if (this.farmer.spd > 0) {
-            if (this.farmer.dirH === 64) {
-                this.farmer.dirH = 96;
-                this.farmer.dirW = 32;
-            }
-        }
-        
-        this.farmer.x -= this.farmer.spd;
-
         this.waterArr.forEach((water) => {
             water.y += water.spd;
             if (water.y > 6.5 * tileSize) {
@@ -244,14 +225,6 @@ class Game {
                 this.baddies ++;
             }
         });
-
-        for (let i = this.tomatoArr.length - 1; i >= 0; i--) {
-            let tomato = this.tomatoArr[i];
-            if (collisionCheck(this.farmer, tomato)) {
-                this.score += 10;
-                this.tomatoArr.splice(i, 1);
-            }
-        } //TOMATO
     }
 
     drawMenu() {
@@ -267,39 +240,36 @@ class Game {
         //[LAYER 1]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
             image(spriteSheet, i*tileSize, 4.5*tileSize, 64, 128, 0, 32, 32, 64);
-        } // VINE
+        }
         // drawRect(0, 5.5*tileSize, canvasWidth, 64, 'green');
 
         //[LAYER 2]
         this.tomatoArr.forEach((tomato) => {
             image(spriteSheet, tomato.x, tomato.y, tomato.w, tomato.h, 0, 0, 32, 32);
-        }); //TOMATO
-
-        image(spriteSheet, this.farmer.x, this.farmer.y, this.farmer.w, this.farmer.h, this.farmer.dirH, this.farmer.dirW, 32, 64); //DUDE
-        // drawRect(this.farmer.x, this.farmer.y, this.farmer.w, this.farmer.h, 'tan');
+        });
 
         this.waterArr.forEach((water) => {
             image(spriteSheet, water.x, water.y, water.w, water.h, 32, 0, 32, 32);
-        }); //WATER
+        });
 
         this.goodiesArr.forEach((goods) => {
             image(spriteSheet, goods.x, goods.y, goods.w, goods.h, 96, 0, 32, 32)
-        }); //GOODIES
+        });
 
         this.baddiesArr.forEach((cat) => {
             image(spriteSheet, cat.x, cat.y, cat.w, cat.h, 64, 0, 32, 32)
-        }); //CATTERPILLAR
+        });
 
         //[LAYER 3]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
             image(spriteSheet, i*tileSize, 6.5*tileSize, 64, 96, 32, 32, 32, 64);
-        } // DIRT
+        }
         // drawRect(0, 6.5*tileSize, canvasWidth, 64, 'brown');
         
         //[PANEL]
         drawRect(0, 0, canvasWidth, 1.5*tileSize, color(0, 0, 0, 128));
-        drawText(`Температура: ${this.temperature}`, 8, 22, 14, this.temperatureColor, LEFT);
-        drawText(`Влажность: ${this.wetness}`, 8, 2*22, 14, this.wetnessColor, LEFT);
+        drawText(`Температура: ${this.temperature}°`, 8, 22, 14, this.temperatureColor, LEFT);
+        drawText(`Влажность: ${this.wetness}%`, 8, 2*22, 14, this.wetnessColor, LEFT);
         drawText(`Удобрения: ${this.goodies}`, 8, 3*22, 14, this.goodiesColor, LEFT);
         drawText(`Вредители: ${this.baddies}`, 8, 4*22, 14, this.baddiesColor, LEFT);
 
@@ -322,21 +292,21 @@ class Game {
     }
 
     doWater() {
-        if (this.cooldown.water <= 0) {
+        if (this.cooldown.dowater <= 0) {
             let water = new Entity(floor(random(tileSize, canvasWidth)), 0, 32, 32, 8);
             this.waterArr.push(water);
         }
     }
 
     doGoodies() {
-        if (this.cooldown.goodies <= 0) {
+        if (this.cooldown.dogoodies <= 0) {
             let goods = new Entity(floor(random(16, canvasWidth - 16)), -16, 32, 32, 8);
             this.goodiesArr.push(goods);
         }
     }
 
     doBaddies() {
-        if (this.cooldown.baddies <= 0) {
+        if (this.cooldown.dobaddies <= 0) {
             let cat = new Entity(floor(random(16, canvasWidth - 16)), -16, 32, 32, 8);
             this.baddiesArr.push(cat);
         }
@@ -344,6 +314,9 @@ class Game {
 
     doTomato() {
         let tomato = new Entity(floor(random(16, canvasWidth - 16)), floor(random(4.5*tileSize, 5.5*tileSize)), 32, 32, 8);
+        // tomato.type = 'normal'; //normal, golden
+        // tomato.state = 1; //1, 2, 3
+
         this.tomatoArr.push(tomato);
     }
 
@@ -380,8 +353,6 @@ function setupAssets () {
 }
 
 function draw() {
-    clear();
-    
     if (gameState === 'menu') {
         game.updateMenu();
         game.drawMenu();
@@ -419,12 +390,12 @@ function drawRect(x, y, w, h, c = 'white') {
     rect(x, y, w, h);
 }
 
-function collisionCheck(a, b) {
-    return a.x + a.w >= b.x &&
-    a.x <= b.x + b.w &&
-    a.y + a.h >= b.y &&
-    a.y <= b.y + b.h;
-}
+// function collisionCheck(a, b) {
+//     return a.x + a.w >= b.x &&
+//     a.x <= b.x + b.w &&
+//     a.y + a.h >= b.y &&
+//     a.y <= b.y + b.h;
+// }
 
 function keyPressed() {
     if (gameState === 'menu') {
@@ -462,6 +433,17 @@ function keyPressed() {
         if (keyIsDown(68)) {
             game.determinateBaddies();
             // console.log(key + keyCode + ": вредители +");
+        }
+    }
+}
+
+function mousePressed() {
+    for (let i = game.tomatoArr.length - 1; i >= 0; i--) {
+        let tomato = game.tomatoArr[i];
+        if (mouseX > tomato.x && mouseX < tomato.x + tomato.w && mouseY > tomato.y && mouseY < tomato.y + tomato.h) {
+            game.score += 10;
+            game.tomatoArr.splice(i, 1);
+            break;
         }
     }
 }

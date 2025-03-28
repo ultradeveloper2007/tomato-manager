@@ -18,7 +18,6 @@ async function loadData() {
   .order('score', {ascending: false});
 
   dbArr = data;
-  // console.log(dbArr);
 
   if (error) {
     console.log("Ошибка: ", error);
