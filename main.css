@@ -4,12 +4,10 @@
 }
 
 body {
-    background-image: url('./res/farmland.png');
-    background-repeat: repeat;
+    background-color: lightgrey;
 
-    text-shadow: 3px 3px 2px black;
     text-align: center;
-    color: white;
+    color: black;
 
     font-family: press-start;
     font-size: 14px;
@@ -21,5 +19,5 @@ canvas {
 }
 
 .logo {
-    font-size: 32px;
+    margin: 10px;
 }

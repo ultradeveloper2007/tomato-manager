@@ -8,14 +8,7 @@ let gameState;
 let font;
 let spriteSheet;
 
-// let sprite = {
-//     tomato,
-//     water,
-//     goodies,
-//     catterpillar,
-//     vines,
-//     ground,
-// }
+let sprite = {}
 
 let dbArr = [];
 
@@ -228,41 +221,46 @@ class Game {
     }
 
     drawMenu() {
-        background('green');
+        background(sprite.sky); //background('green');
         drawText("Тепличный менеджер", canvasWidth/2, 1*tileSize, 32);
         drawText("Твое имя: " + `${this.nickname.toUpperCase()}`, canvasWidth/2, 5*tileSize, 18);
         drawText("Нажми ПРОБЕЛ, чтобы играть", canvasWidth/2, 7*tileSize);
     }
 
     drawGame() {
-        background('cornflowerblue');
+        background(sprite.sky); // background('cornflowerblue');
 
         //[LAYER 1]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
-            image(spriteSheet, i*tileSize, 4.5*tileSize, 64, 128, 0, 32, 32, 64);
+            image(sprite.vine, i*tileSize, 4*tileSize, 64, 64);
+            image(sprite.vine, i*tileSize, 5*tileSize, 64, 64);
         }
         // drawRect(0, 5.5*tileSize, canvasWidth, 64, 'green');
 
         //[LAYER 2]
         this.tomatoArr.forEach((tomato) => {
-            image(spriteSheet, tomato.x, tomato.y, tomato.w, tomato.h, 0, 0, 32, 32);
+            image(sprite.tomato, tomato.x, tomato.y, tomato.w, tomato.h);
         });
 
         this.waterArr.forEach((water) => {
             image(spriteSheet, water.x, water.y, water.w, water.h, 32, 0, 32, 32);
+            // image(sprite.water, water.x, water.y, water.w, water.h);
         });
 
         this.goodiesArr.forEach((goods) => {
-            image(spriteSheet, goods.x, goods.y, goods.w, goods.h, 96, 0, 32, 32)
+            image(spriteSheet, goods.x, goods.y, goods.w, goods.h, 96, 0, 32, 32);
+            // image(sprite.goodies, goods.x, goods.y, goods.w, goods.h);
         });
 
         this.baddiesArr.forEach((cat) => {
-            image(spriteSheet, cat.x, cat.y, cat.w, cat.h, 64, 0, 32, 32)
+            image(spriteSheet, cat.x, cat.y, cat.w, cat.h, 64, 0, 32, 32);
+            // image(sprite.catterpillar, cat.x, cat.y, cat.w, cat.h);
         });
 
         //[LAYER 3]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
-            image(spriteSheet, i*tileSize, 6.5*tileSize, 64, 96, 32, 32, 32, 64);
+            image(sprite.grass, i*tileSize, 6*tileSize, 64, 64);
+            image(sprite.dirt, i*tileSize, 7*tileSize, 64, 64);
         }
         // drawRect(0, 6.5*tileSize, canvasWidth, 64, 'brown');
         
@@ -278,7 +276,7 @@ class Game {
     }
 
     drawRecords() {
-        background('black');
+        background(sprite.sky); //background('black');
         drawText("Твой рекорд:", canvasWidth/2, 1*tileSize, 48);
         drawText(`${this.score}`, canvasWidth/2, 2*tileSize, 48);
 
@@ -313,9 +311,9 @@ class Game {
     }
 
     doTomato() {
-        let tomato = new Entity(floor(random(16, canvasWidth - 16)), floor(random(4.5*tileSize, 5.5*tileSize)), 32, 32, 8);
-        // tomato.type = 'normal'; //normal, golden
-        // tomato.state = 1; //1, 2, 3
+        let tomato = new Entity(floor(random(32, canvasWidth - 32)), floor(random(3.5*tileSize, 5*tileSize)), 48, 48);
+
+        tomato.type = floor(random(1, 3));
 
         this.tomatoArr.push(tomato);
     }
@@ -347,7 +345,17 @@ function setupGame() {
 }
 
 function setupAssets () {
-    spriteSheet = loadImage('./res/spritesheet.png');
+    sprite.tomato = loadImage('./res/img/tomato.png');
+    // sprite.water = loadImage('./res/');
+    // sprite.goodies = loadImage('./res/');
+    // sprite.catterpillar = loadImage('./res/');
+
+    sprite.vine = loadImage('./res/img/vine.png');
+    sprite.dirt = loadImage('./res/img/dirt.png');
+    sprite.grass = loadImage('./res/img/grass_block_side.png');
+    sprite.sky = loadImage('./res/img/skybox_sideClouds.png');
+
+    spriteSheet = loadImage('./res/img/spritesheet.png');
     font = loadFont('./res/PressStart2P-Regular.ttf');
     textFont(font);
 }
@@ -438,12 +446,19 @@ function keyPressed() {
 }
 
 function mousePressed() {
-    for (let i = game.tomatoArr.length - 1; i >= 0; i--) {
-        let tomato = game.tomatoArr[i];
-        if (mouseX > tomato.x && mouseX < tomato.x + tomato.w && mouseY > tomato.y && mouseY < tomato.y + tomato.h) {
-            game.score += 10;
-            game.tomatoArr.splice(i, 1);
-            break;
-        }
+    if (gameState === 'game') {
+        for (let i = game.tomatoArr.length - 1; i >= 0; i--) {
+            let tomato = game.tomatoArr[i];
+            if (mouseX > tomato.x && mouseX < tomato.x + tomato.w && mouseY > tomato.y && mouseY < tomato.y + tomato.h) {
+                if (tomato.type === 1) {
+                    game.score += 20;
+                    game.tomatoArr.splice(i, 1);
+                } else if (tomato.type === 2) {
+                    game.score += 40;
+                    game.tomatoArr.splice(i, 1);
+                }
+                break;
+            }
+        }        
     }
 }
