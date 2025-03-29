@@ -8,7 +8,8 @@ let gameState;
 let font;
 let spriteSheet;
 
-let sprite = {}
+let sprite = {};
+let sound = {};
 
 let dbArr = [];
 
@@ -55,16 +56,23 @@ class Game {
 
     initMenu() {
         this.nicknameArr = ['a', 'a', 'a']
-        this.nickname = this.nicknameArr[0] + this.nicknameArr[1] + this.nicknameArr[2]
+        this.nickname = this.nicknameArr[0] + this.nicknameArr[1] + this.nicknameArr[2];
         gameState = 'menu';
     }
 
     initGame() {
+        sound.ost.play();
+
+        this.tomatoArr = [];
+        this.waterArr = [];
+        this.goodiesArr = [];
+        this.baddiesArr = [];
+
         this.temperature = floor(random(20, 26));
         this.wetness = floor(random(70, 73));
         this.goodies = floor(random(0, 4));
         this.baddies = 0;
-        this.time = 30; //timer
+        this.time = 42; //timer
         this.score = 0;
         
         this.cooldown = {
@@ -142,7 +150,6 @@ class Game {
         if (this.score > 0) {
             await saveData(this.nickname.toUpperCase(), this.score);
         }
-
         await loadData();
     }
 
@@ -221,14 +228,14 @@ class Game {
     }
 
     drawMenu() {
-        background(sprite.sky); //background('green');
+        background(sprite.sky);
         drawText("Тепличный менеджер", canvasWidth/2, 1*tileSize, 32);
         drawText("Твое имя: " + `${this.nickname.toUpperCase()}`, canvasWidth/2, 5*tileSize, 18);
         drawText("Нажми ПРОБЕЛ, чтобы играть", canvasWidth/2, 7*tileSize);
     }
 
     drawGame() {
-        background(sprite.sky); // background('cornflowerblue');
+        background(sprite.sky);
 
         //[LAYER 1]
         for (let i = 0; i < canvasWidth/tileSize; i++) {
@@ -276,7 +283,7 @@ class Game {
     }
 
     drawRecords() {
-        background(sprite.sky); //background('black');
+        background(sprite.sky);
         drawText("Твой рекорд:", canvasWidth/2, 1*tileSize, 48);
         drawText(`${this.score}`, canvasWidth/2, 2*tileSize, 48);
 
@@ -305,7 +312,7 @@ class Game {
 
     doBaddies() {
         if (this.cooldown.dobaddies <= 0) {
-            let cat = new Entity(floor(random(16, canvasWidth - 16)), -16, 32, 32, 8);
+            let cat = new Entity(floor(random(16, canvasWidth - 16)), -16, 48, 48, 10);
             this.baddiesArr.push(cat);
         }
     }
@@ -326,6 +333,27 @@ class Game {
     }
 }
 
+function preload() {
+    sprite.tomato = loadImage('./res/img/tomato.png');
+    // sprite.water = loadImage('./res/');
+    // sprite.goodies = loadImage('./res/');
+    // sprite.catterpillar = loadImage('./res/');
+
+    sprite.vine = loadImage('./res/img/vine.png');
+    sprite.dirt = loadImage('./res/img/dirt.png');
+    sprite.grass = loadImage('./res/img/grass_block_side.png');
+    sprite.sky = loadImage('./res/img/skybox_sideClouds.png');
+
+    spriteSheet = loadImage('./res/img/spritesheet.png');
+
+    sound.pick = loadSound('./res/sound/drop_004.ogg');
+    sound.select = loadSound('./res/sound/glass_001.ogg');
+    sound.typing = loadSound('./res/sound/glass_006.ogg');
+    sound.ost = loadSound('./res/sound/soundtrack.mp3');
+
+    font = loadFont('./res/PressStart2P-Regular.ttf');
+}
+
 function setup() {
     setupCanvas(canvasWidth, canvasHeight);
     frameRate(60);
@@ -339,25 +367,18 @@ function setupCanvas(w, h) {
     canvas.parent('tomato-manager');
 }
 
+function setupAssets () {
+    soundFormats('mp3', 'ogg');
+    sound.pick.setVolume(0.3);
+    sound.select.setVolume(0.8);
+    sound.typing.setVolume(0.8);
+    sound.ost.setVolume(0.2);
+    textFont(font);
+}
+
 function setupGame() {
     game = new Game();
     game.initMenu();
-}
-
-function setupAssets () {
-    sprite.tomato = loadImage('./res/img/tomato.png');
-    // sprite.water = loadImage('./res/');
-    // sprite.goodies = loadImage('./res/');
-    // sprite.catterpillar = loadImage('./res/');
-
-    sprite.vine = loadImage('./res/img/vine.png');
-    sprite.dirt = loadImage('./res/img/dirt.png');
-    sprite.grass = loadImage('./res/img/grass_block_side.png');
-    sprite.sky = loadImage('./res/img/skybox_sideClouds.png');
-
-    spriteSheet = loadImage('./res/img/spritesheet.png');
-    font = loadFont('./res/PressStart2P-Regular.ttf');
-    textFont(font);
 }
 
 function draw() {
@@ -408,7 +429,8 @@ function drawRect(x, y, w, h, c = 'white') {
 function keyPressed() {
     if (gameState === 'menu') {
         if (keyIsDown(32)) {
-            game.initGame();   
+            game.initGame();
+            sound.select.play();   
         }
         if (keyCode >= 65 && keyCode <= 90) {
             game.nicknameArr.push(key);
@@ -416,10 +438,12 @@ function keyPressed() {
                 game.nicknameArr.shift();
             }
             game.nickname = game.nicknameArr[0] + game.nicknameArr[1] + game.nicknameArr[2];
+            sound.typing.play();
         }
     }
     if (gameState === 'records' && keyIsDown(32)) {
         game.initMenu();
+        sound.select.play();
     }
     if (gameState === 'game') {
         if (keyIsDown(87)) {
@@ -457,8 +481,9 @@ function mousePressed() {
                     game.score += 40;
                     game.tomatoArr.splice(i, 1);
                 }
+                sound.pick.play();
                 break;
             }
-        }        
+        }    
     }
 }
