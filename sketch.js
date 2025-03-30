@@ -127,8 +127,16 @@ class Game {
         }
 
         if (this.cooldown.changewater <= 0) {
-            this.wetness += floor(random(-2, 2));
-            this.cooldown.changewater = 3;
+            if (this.temperature > 27) {
+                this.wetness -= 2
+                this.cooldown.changewater = 1;
+            } else if (this.temperature < 18) {
+                this.wetness += 0;
+                this.cooldown.changewater = 1;
+            } else {
+                this.wetness += floor(random(-2, 2));
+                this.cooldown.changewater = 2;
+            }
         }
 
         if (this.cooldown.changegoodies <= 0) {
@@ -137,9 +145,11 @@ class Game {
         }
 
         //[spawn cats]
-        let spawnCatChance = random(0, 1);
-        if (spawnCatChance > 0.85) this.doBaddies();
-
+        if (this.cooldown.dobaddies <= 0) {
+            this.doBaddies();
+            this.cooldown.dobaddies = floor(random(20, 25));
+        }
+        
         //[spawn tomatos]
         if (this.temperatureState === 'good' && this.wetnessState === 'good' && this.goodiesState === 'good' && this.baddiesState === 'good') {
             this.doTomato();
@@ -175,7 +185,7 @@ class Game {
             this.temperatureColor = 'white';
         }
         
-        if (this.wetness > 75 || this.wetness < 70) {
+        if (this.wetness > 80 || this.wetness < 70) {
             this.wetnessState = 'bad';
             this.wetnessColor = 'red';
         } else {
@@ -200,10 +210,11 @@ class Game {
         }
         
         this.waterArr.forEach((water) => {
-            water.y += water.spd;
+            water.y += water.spd * deltaTime;
             if (water.y > 6.5 * tileSize) {
                 this.waterArr.shift();
-                this.wetness += 5;
+                this.wetness += 2;
+                this.temperature --;
                 if (this.goodies > 0) {
                     this.goodies --;
                 }
@@ -211,7 +222,7 @@ class Game {
         });
 
         this.goodiesArr.forEach((goods) => {
-            goods.y += goods.spd;
+            goods.y += goods.spd * deltaTime;
             if (goods.y > 6.5 * tileSize) {
                 this.goodiesArr.shift();
                 this.goodies ++;
@@ -219,12 +230,22 @@ class Game {
         });
 
         this.baddiesArr.forEach((cat) => {
-            cat.y += cat.spd;
+            cat.y += cat.spd * deltaTime;
             if (cat.y > 6.5 * tileSize) {
                 this.baddiesArr.shift();
                 this.baddies ++;
             }
         });
+
+        for (let i = game.tomatoArr.length - 1; i >= 0; i--) {
+            let tomato = game.tomatoArr[i];
+            if (tomato.lifetime <= 0) {
+                game.tomatoArr.splice(i, 1);
+                break;
+            } else {
+                tomato.lifetime -= 1;
+            }
+        }
     }
 
     drawMenu() {
@@ -246,7 +267,7 @@ class Game {
 
         //[LAYER 2]
         this.tomatoArr.forEach((tomato) => {
-            image(sprite.tomato, tomato.x, tomato.y, tomato.w, tomato.h);
+            image(tomato.img, tomato.x, tomato.y, tomato.w, tomato.h);
         });
 
         this.waterArr.forEach((water) => {
@@ -255,8 +276,7 @@ class Game {
         });
 
         this.goodiesArr.forEach((goods) => {
-            image(spriteSheet, goods.x, goods.y, goods.w, goods.h, 96, 0, 32, 32);
-            // image(sprite.goodies, goods.x, goods.y, goods.w, goods.h);
+            image(sprite.goodies, goods.x, goods.y, goods.w, goods.h);
         });
 
         this.baddiesArr.forEach((cat) => {
@@ -291,6 +311,8 @@ class Game {
             for (let i = 0; i < 5; i++) {
                 drawText(`${i+1}: ${dbArr[i]['nickname']} ${dbArr[i]['score']}`, canvasWidth/2 - tileSize, (i+7)*tileSize/2, 14, 'white', LEFT);
             }
+        } else {
+            drawText("Загрузка", canvasWidth/2, canvasHeight/2 + 32, 18);
         }
         
         drawText("Нажми ПРОБЕЛ, чтобы вернуться в меню", canvasWidth/2, 7*tileSize);
@@ -298,29 +320,36 @@ class Game {
 
     doWater() {
         if (this.cooldown.dowater <= 0) {
-            let water = new Entity(floor(random(tileSize, canvasWidth)), 0, 32, 32, 8);
+            let water = new Entity(floor(random(tileSize, canvasWidth)), 0, 32, 32, 0.6);
             this.waterArr.push(water);
         }
     }
 
     doGoodies() {
         if (this.cooldown.dogoodies <= 0) {
-            let goods = new Entity(floor(random(16, canvasWidth - 16)), -16, 32, 32, 8);
+            let goods = new Entity(floor(random(16, canvasWidth - 16)), -16, 40, 40, 0.6);
             this.goodiesArr.push(goods);
         }
     }
 
     doBaddies() {
-        if (this.cooldown.dobaddies <= 0) {
-            let cat = new Entity(floor(random(16, canvasWidth - 16)), -16, 48, 48, 10);
-            this.baddiesArr.push(cat);
-        }
+        let cat = new Entity(floor(random(16, canvasWidth - 16)), -16, 48, 48, 0.7);
+        this.baddiesArr.push(cat);
     }
 
     doTomato() {
         let tomato = new Entity(floor(random(32, canvasWidth - 32)), floor(random(3.5*tileSize, 5*tileSize)), 48, 48);
 
         tomato.type = floor(random(1, 3));
+        if (tomato.type === 1) {
+            tomato.cost = 20;
+            tomato.img = sprite.tomato;
+            tomato.lifetime = 300;
+        } else if (tomato.type === 2) {
+            tomato.cost = 40;
+            tomato.img = sprite.tomatoGolden;
+            tomato.lifetime = 200;
+        }
 
         this.tomatoArr.push(tomato);
     }
@@ -335,8 +364,9 @@ class Game {
 
 function preload() {
     sprite.tomato = loadImage('./res/img/tomato.png');
+    sprite.tomatoGolden = loadImage('./res/img/tomato_golden.png');
     // sprite.water = loadImage('./res/');
-    // sprite.goodies = loadImage('./res/');
+    sprite.goodies = loadImage('./res/img/goodie.png');
     // sprite.catterpillar = loadImage('./res/');
 
     sprite.vine = loadImage('./res/img/vine.png');
@@ -370,9 +400,9 @@ function setupCanvas(w, h) {
 function setupAssets () {
     soundFormats('mp3', 'ogg');
     sound.pick.setVolume(0.3);
-    sound.select.setVolume(0.8);
-    sound.typing.setVolume(0.8);
-    sound.ost.setVolume(0.2);
+    sound.select.setVolume(0.5);
+    sound.typing.setVolume(0.5);
+    sound.ost.setVolume(0.1);
     textFont(font);
 }
 
@@ -474,16 +504,11 @@ function mousePressed() {
         for (let i = game.tomatoArr.length - 1; i >= 0; i--) {
             let tomato = game.tomatoArr[i];
             if (mouseX > tomato.x && mouseX < tomato.x + tomato.w && mouseY > tomato.y && mouseY < tomato.y + tomato.h) {
-                if (tomato.type === 1) {
-                    game.score += 20;
-                    game.tomatoArr.splice(i, 1);
-                } else if (tomato.type === 2) {
-                    game.score += 40;
-                    game.tomatoArr.splice(i, 1);
-                }
+                game.score += tomato.cost;
+                game.tomatoArr.splice(i, 1);
                 sound.pick.play();
                 break;
             }
-        }    
+        }
     }
 }
