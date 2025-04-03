@@ -72,7 +72,7 @@ class Game {
         this.wetness = floor(random(70, 73));
         this.goodies = floor(random(0, 4));
         this.baddies = 0;
-        this.time = 42; //timer
+        this.time = 30; //timer
         this.score = 0;
         
         this.cooldown = {
@@ -158,13 +158,16 @@ class Game {
 
     async dbInit() {
         if (this.score > 0) {
-            await saveData(this.nickname.toUpperCase(), this.score);
+            await saveData(this.nickname.toUpperCase(), this.score);    
         }
         await loadData();
     }
 
     initRecords() {
+        sound.ost.stop();
+
         this.dbInit();
+        
         this.recLoading = 180;
         
         gameState = 'records';
@@ -309,7 +312,11 @@ class Game {
 
         if (this.recLoading === 0) {
             for (let i = 0; i < 5; i++) {
-                drawText(`${i+1}: ${dbArr[i]['nickname']} ${dbArr[i]['score']}`, canvasWidth/2 - tileSize, (i+7)*tileSize/2, 14, 'white', LEFT);
+                try {
+                    drawText(`${i+1}: ${dbArr[i]['nickname']} ${dbArr[i]['score']}`, canvasWidth/2 - tileSize, (i+7)*tileSize/2, 14, 'white', LEFT);    
+                } catch (error) {
+                    drawText("Нет интернета", canvasWidth/2, canvasHeight/2 + 32, 18);        
+                }
             }
         } else {
             drawText("Загрузка", canvasWidth/2, canvasHeight/2 + 32, 18);
@@ -341,14 +348,21 @@ class Game {
         let tomato = new Entity(floor(random(32, canvasWidth - 32)), floor(random(3.5*tileSize, 5*tileSize)), 48, 48);
 
         tomato.type = floor(random(1, 3));
-        if (tomato.type === 1) {
-            tomato.cost = 20;
-            tomato.img = sprite.tomato;
-            tomato.lifetime = 300;
-        } else if (tomato.type === 2) {
-            tomato.cost = 40;
-            tomato.img = sprite.tomatoGolden;
-            tomato.lifetime = 200;
+
+        switch (tomato.type) {
+            case 1:
+                tomato.cost = 20;
+                tomato.img = sprite.tomato;
+                tomato.lifetime = 300;    
+                break;
+            case 2:
+                tomato.cost = 40;
+                tomato.img = sprite.tomatoGolden;
+                tomato.lifetime = 200;    
+                break;
+        
+            default:
+                break;
         }
 
         this.tomatoArr.push(tomato);
