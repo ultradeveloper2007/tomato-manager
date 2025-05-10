@@ -479,23 +479,18 @@ function keyPressed() {
     if (gameState === 'game') {
         if (keyIsDown(87)) {
             game.temperature ++;
-            // console.log(key + keyCode + ": температура +");
         }
         if (keyIsDown(83)) {
             game.temperature --;
-            // console.log(key + keyCode + ": температура -");
         }
         if (keyIsDown(81)) {
             game.doWater();
-            // console.log(key + keyCode + ": влажность +");
         }
         if (keyIsDown(69)) {
             game.doGoodies();
-            // console.log(key + keyCode + ": удобрение +");
         }
         if (keyIsDown(68)) {
             game.determinateBaddies();
-            // console.log(key + keyCode + ": вредители +");
         }
     }
 }
