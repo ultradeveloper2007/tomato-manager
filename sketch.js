@@ -6,8 +6,6 @@ let game;
 let gameState;
 
 let font;
-let spriteSheet;
-
 let sprite = {};
 let sound = {};
 
@@ -274,8 +272,7 @@ class Game {
         });
 
         this.waterArr.forEach((water) => {
-            image(spriteSheet, water.x, water.y, water.w, water.h, 32, 0, 32, 32);
-            // image(sprite.water, water.x, water.y, water.w, water.h);
+            image(sprite.water, water.x, water.y, water.w, water.h);
         });
 
         this.goodiesArr.forEach((goods) => {
@@ -283,8 +280,7 @@ class Game {
         });
 
         this.baddiesArr.forEach((cat) => {
-            image(spriteSheet, cat.x, cat.y, cat.w, cat.h, 64, 0, 32, 32);
-            // image(sprite.catterpillar, cat.x, cat.y, cat.w, cat.h);
+            image(sprite.catterpillar, cat.x, cat.y, cat.w, cat.h);
         });
 
         //[LAYER 3]
@@ -379,16 +375,14 @@ class Game {
 function preload() {
     sprite.tomato = loadImage('./res/img/tomato.png');
     sprite.tomatoGolden = loadImage('./res/img/tomato_golden.png');
-    // sprite.water = loadImage('./res/');
+    sprite.water = loadImage('./res/img/water.png');
     sprite.goodies = loadImage('./res/img/goodie.png');
-    // sprite.catterpillar = loadImage('./res/');
+    sprite.catterpillar = loadImage('./res/img/cat.png');
 
     sprite.vine = loadImage('./res/img/vine.png');
     sprite.dirt = loadImage('./res/img/dirt.png');
     sprite.grass = loadImage('./res/img/grass_block_side.png');
     sprite.sky = loadImage('./res/img/skybox_sideClouds.png');
-
-    spriteSheet = loadImage('./res/img/spritesheet.png');
 
     sound.pick = loadSound('./res/sound/drop_004.ogg');
     sound.select = loadSound('./res/sound/glass_001.ogg');
@@ -462,13 +456,6 @@ function drawRect(x, y, w, h, c = 'white') {
     fill(c);
     rect(x, y, w, h);
 }
-
-// function collisionCheck(a, b) {
-//     return a.x + a.w >= b.x &&
-//     a.x <= b.x + b.w &&
-//     a.y + a.h >= b.y &&
-//     a.y <= b.y + b.h;
-// }
 
 function keyPressed() {
     if (gameState === 'menu') {
